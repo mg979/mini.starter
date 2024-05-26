@@ -245,6 +245,11 @@ Default values:
     -- allows you to go into command mode.
     query_updaters = 'abcdefghijklmnopqrstuvwxyz0123456789_-.',
 
+    -- Additional normal mode mappings that will be applied to the buffer.
+    -- Provided in a table where each key is a mapping, the value is a string
+    -- (an ex command to be executed) or a function.
+    extra_mappings = nil,
+
     -- Whether to disable showing non-error feedback
     silent = false,
   }

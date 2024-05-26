@@ -268,6 +268,11 @@ MiniStarter.config = {
   -- allows you to go into command mode.
   query_updaters = 'abcdefghijklmnopqrstuvwxyz0123456789_-.',
 
+  -- Additional normal mode mappings that will be applied to the buffer.
+  -- Provided in a table where each key is a mapping, the value is a string
+  -- (an ex command to be executed) or a function.
+  extra_mappings = nil,
+
   -- Whether to disable showing non-error feedback
   silent = false,
 }
@@ -1419,9 +1424,15 @@ H.apply_buffer_options = function(buf_id)
 end
 
 H.apply_buffer_mappings = function(buf_id)
-  local buf_keymap = function(key, cmd)
-    vim.keymap.set('n', key, ('<Cmd>lua %s<CR>'):format(cmd), { buffer = buf_id, nowait = true, silent = true })
+  local buf_keymap = function(key, cmd, ex)
+    -- `cmd` could be a function in the case of extra mappings
+    if type(cmd) == "string" then
+      cmd = (ex and '<Cmd>%s<CR>' or '<Cmd>lua %s<CR>'):format(cmd)
+    end
+    vim.keymap.set('n', key, cmd, { buffer = buf_id, nowait = true, silent = true })
   end
+
+  local config = H.get_config()
 
   buf_keymap('<CR>', 'MiniStarter.eval_current_item()')
 
@@ -1433,7 +1444,7 @@ H.apply_buffer_mappings = function(buf_id)
   buf_keymap('<M-j>', [[MiniStarter.update_current_item('next')]])
 
   -- Make all special symbols to update query
-  for _, key in ipairs(vim.split(H.get_config().query_updaters, '')) do
+  for _, key in ipairs(vim.split(config.query_updaters, '')) do
     local key_string = vim.inspect(tostring(key))
     buf_keymap(key, ('MiniStarter.add_to_query(%s)'):format(key_string))
   end
@@ -1441,6 +1452,13 @@ H.apply_buffer_mappings = function(buf_id)
   buf_keymap('<Esc>', [[MiniStarter.set_query('')]])
   buf_keymap('<BS>', 'MiniStarter.add_to_query()')
   buf_keymap('<C-c>', 'MiniStarter.close()')
+
+  local extra = config.extra_mappings
+  if extra and type(extra) == "table" then
+    for k, v in pairs(extra) do
+      buf_keymap(k, v, true)
+    end
+  end
 end
 
 H.add_hl_activity = function(buf_id, query)
