@@ -18,6 +18,8 @@
 ---       argument.
 ---     - <name> - string which will be displayed and used for choosing.
 ---     - <section> - string representing to which section item belongs.
+---     - <bullet> - string used for bullet (overrides the default one).
+---     - <bullet_hl> - string with the highlight group used for the bullet.
 ---   There are pre-configured whole sections in |MiniStarter.sections|.
 ---
 --- - Configure what items are displayed by supplying an array which can be
@@ -504,10 +506,13 @@ end
 ---@param show_path boolean|function|nil Whether to append file name with its path.
 ---   If callable, will be called with full path and should return string to be
 ---   directly appended to file name. Default: `true`.
+---@param opts table Additional item options (<bullet>, <bullet_hl>).
+---   Default: `nil`.
 ---
 ---@return __starter_section_fun
-MiniStarter.sections.recent_files = function(n, current_dir, show_path)
+MiniStarter.sections.recent_files = function(n, current_dir, show_path, opts)
   n = n or 5
+  opts = type(opts) == 'table' and opts or {}
   if current_dir == nil then current_dir = false end
 
   if show_path == nil then show_path = true end
@@ -543,7 +548,16 @@ MiniStarter.sections.recent_files = function(n, current_dir, show_path)
     local items = {}
     for _, f in ipairs(vim.list_slice(files, 1, n)) do
       local name = vim.fn.fnamemodify(f, ':t') .. show_path(f)
-      table.insert(items, { action = 'edit ' .. f, name = name, section = section })
+      table.insert(
+        items,
+        {
+          action = 'edit ' .. f,
+          name = name,
+          section = section,
+          bullet = opts.bullet,
+          bullet_hl = opts.bullet_hl,
+        }
+      )
     end
 
     return items
@@ -653,12 +667,16 @@ MiniStarter.gen_hook.adding_bullet = function(bullet, place_cursor)
     -- Go backwards to avoid conflict when inserting units
     for i = #coords, 1, -1 do
       local l_num, u_num = coords[i].line, coords[i].unit
+      local item = content[l_num][u_num].item
+      if item.bullet then
+        bullet = item.bullet .. ' '
+      end
       local bullet_unit = {
         string = bullet,
         type = 'item_bullet',
-        hl = 'MiniStarterItemBullet',
+        hl = item.bullet_hl or 'MiniStarterItemBullet',
         -- Use `_item` instead of `item` because it is better to be 'private'
-        _item = content[l_num][u_num].item,
+        _item = item,
         _place_cursor = place_cursor,
       }
       table.insert(content[l_num], u_num, bullet_unit)

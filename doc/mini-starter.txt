@@ -18,6 +18,8 @@ Key design ideas:
       argument.
     - <name> - string which will be displayed and used for choosing.
     - <section> - string representing to which section item belongs.
+    - <bullet> - string used for bullet (overrides the default one).
+    - <bullet_hl> - string with the highlight group used for the bullet.
   There are pre-configured whole sections in |MiniStarter.sections|.
 
 - Configure what items are displayed by supplying an array which can be
