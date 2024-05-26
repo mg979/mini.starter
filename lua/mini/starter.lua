@@ -14,6 +14,8 @@
 ---   following info:
 ---     - <action> - function or string for |vim.cmd| which is executed when
 ---       item is chosen. Empty string result in placeholder "inactive" item.
+---       If <action> is a function, it is called with the item <name> as
+---       argument.
 ---     - <name> - string which will be displayed and used for choosing.
 ---     - <section> - string representing to which section item belongs.
 ---   There are pre-configured whole sections in |MiniStarter.sections|.
@@ -908,7 +910,8 @@ MiniStarter.eval_current_item = function(buf_id)
   H.make_query(vim.api.nvim_get_current_buf(), '', false)
 
   local data = H.buffer_data[buf_id]
-  H.eval_fun_or_string(data.items[data.current_item_id].action, true)
+  local item = data.items[data.current_item_id]
+  H.eval_fun_or_string(item.action, item.name)
 end
 
 --- Update current item
@@ -1524,14 +1527,11 @@ H.validate_starter_buf_id = function(buf_id, fun_name, severity)
   return false
 end
 
-H.eval_fun_or_string = function(x, string_as_cmd)
-  if type(x) == 'function' then return x() end
-  if type(x) == 'string' then
-    if string_as_cmd then
-      vim.cmd(x)
-    else
-      return x
-    end
+H.eval_fun_or_string = function(x, name)
+  if type(x) == 'function' then
+    x(name)
+  elseif type(x) == 'string' then
+    vim.cmd(x)
   end
 end
 

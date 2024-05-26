@@ -14,6 +14,8 @@ Key design ideas:
   following info:
     - <action> - function or string for |vim.cmd| which is executed when
       item is chosen. Empty string result in placeholder "inactive" item.
+      If <action> is a function, it is called with the item <name> as
+      argument.
     - <name> - string which will be displayed and used for choosing.
     - <section> - string representing to which section item belongs.
   There are pre-configured whole sections in |MiniStarter.sections|.
