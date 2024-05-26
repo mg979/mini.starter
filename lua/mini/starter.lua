@@ -273,6 +273,9 @@ MiniStarter.config = {
   -- (an ex command to be executed) or a function.
   extra_mappings = nil,
 
+  -- String with the statusline of the starter window.
+  statusline = nil,
+
   -- Whether to disable showing non-error feedback
   silent = false,
 }
@@ -408,6 +411,11 @@ MiniStarter.refresh = function(buf_id)
   -- -- Always position cursor on current item
   H.position_cursor_on_current_item(buf_id)
   H.add_hl_current_item(buf_id)
+
+  -- Apply statusline
+  if config.statusline then
+    vim.wo.statusline = config.statusline
+  end
 
   -- Apply current query (clear command line afterwards)
   H.make_query(buf_id)

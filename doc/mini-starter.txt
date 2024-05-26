@@ -250,6 +250,9 @@ Default values:
     -- (an ex command to be executed) or a function.
     extra_mappings = nil,
 
+    -- String with the statusline of the starter window.
+    statusline = nil,
+
     -- Whether to disable showing non-error feedback
     silent = false,
   }
